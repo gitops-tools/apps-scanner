@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: sockshop-repo
+  namespace: default
+spec:
+  interval: 15m
+  ref:
+    branch: main
+  url: https://github.com/weaveworks-gitops-poc/wego-sockshop.git

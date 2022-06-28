@@ -1,0 +1,15 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: sockshop-dev
+  namespace: default
+  labels:
+    gitops.pro/pipeline: billing
+    gitops.pro/pipeline-environment: dev
+spec:
+  interval: 5m
+  path: ./apps/sockshop/environments/dev
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: sockshop-repo

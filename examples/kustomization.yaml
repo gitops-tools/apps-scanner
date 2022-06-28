@@ -1,0 +1,3 @@
+resources:
+  - sockshop-dev-kustomization.yaml
+  - sockshop-repo.yaml
