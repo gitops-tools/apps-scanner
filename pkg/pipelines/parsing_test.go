@@ -124,6 +124,42 @@ func TestParser(t *testing.T) {
 	}
 }
 
+func TestParser_with_custom_labels(t *testing.T) {
+	pods := []corev1.Pod{
+		makePod(withLabels(map[string]string{
+			"testing.pipeline":    "billing-pipeline",
+			"testing.environment": "production",
+			"testing.after":       "staging",
+		})),
+		makePod(withLabels(map[string]string{
+			"testing.pipeline":    "billing-pipeline",
+			"testing.environment": "staging",
+		})),
+	}
+
+	p := NewParser(WithLabels("testing.pipeline", "testing.environment", "testing.after"))
+	err := p.Add(&corev1.PodList{Items: pods})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pipelines, err := p.Pipelines()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []Pipeline{
+		{
+			Name:         "billing-pipeline",
+			Environments: []string{"staging", "production"},
+		},
+	}
+
+	if diff := cmp.Diff(want, pipelines); diff != "" {
+		t.Fatalf("failed discovery:\n%s", diff)
+	}
+}
+
 func makePod(opts ...func(runtime.Object)) corev1.Pod {
 	p := corev1.Pod{}
 	for _, o := range opts {

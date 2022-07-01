@@ -25,27 +25,54 @@ const (
 // Parser parses the labels and annotations on runtime Objects and extracts apps
 // from the labels.
 type Parser struct {
-	Accessor  meta.MetadataAccessor
+	accessor  meta.MetadataAccessor
 	discovery map[string]discoveryPipeline
+	Labels    Labels
+}
+
+// Labels configures the set of labels to examine resources for.
+type Labels struct {
+	Pipeline    string
+	Environment string
+	After       string
+}
+
+// WithLabels is a functional option for configuring the Parser with a set of
+// labels.
+func WithLabels(pipeline, environment, after string) func(*Parser) {
+	return func(p *Parser) {
+		p.Labels.Pipeline = pipeline
+		p.Labels.Environment = environment
+		p.Labels.After = after
+	}
 }
 
 // NewParser creates and returns a new Parser ready for use.
-func NewParser() *Parser {
-	return &Parser{
-		Accessor:  meta.NewAccessor(),
+func NewParser(opts ...func(*Parser)) *Parser {
+	p := &Parser{
+		accessor:  meta.NewAccessor(),
 		discovery: make(map[string]discoveryPipeline),
+		Labels: Labels{
+			Pipeline:    PipelineNameLabel,
+			Environment: PipelineEnvironmentLabel,
+			After:       PipelineEnvironmentAfterLabel,
+		},
 	}
+	for _, opt := range opts {
+		opt(p)
+	}
+	return p
 }
 
 // Add accepts a list of objects and records them for parsing with the Pipelines
 // method.
 func (p *Parser) Add(list runtime.Object) error {
 	return meta.EachListItem(list, func(obj runtime.Object) error {
-		l, err := p.Accessor.Labels(obj)
+		l, err := p.accessor.Labels(obj)
 		if err != nil {
 			return fmt.Errorf("failed to get labels from %v: %w", obj, err)
 		}
-		pipelineName := l[PipelineNameLabel]
+		pipelineName := l[p.Labels.Pipeline]
 		if pipelineName == "" {
 			return nil
 		}
@@ -57,8 +84,8 @@ func (p *Parser) Add(list runtime.Object) error {
 			}
 		}
 
-		if n, ok := l[PipelineEnvironmentLabel]; ok {
-			after := l[PipelineEnvironmentAfterLabel]
+		if n, ok := l[p.Labels.Environment]; ok {
+			after := l[p.Labels.After]
 			a.environments.Insert(environment{name: n, after: after})
 		}
 		p.discovery[pipelineName] = a
