@@ -69,7 +69,7 @@ func (p *Parser) Add(list runtime.Object) error {
 				instances:      k8ssets.NewString(),
 				parents:        k8ssets.NewString(),
 				components:     k8ssets.NewString(),
-				kustomizations: sets.NewNamespacedNames(),
+				kustomizations: sets.New[types.NamespacedName](),
 			}
 		}
 		// TODO: this should check for the presence of these labels!
@@ -79,7 +79,7 @@ func (p *Parser) Add(list runtime.Object) error {
 			a.parents.Insert(l[partOfLabel])
 		}
 		if nn := kustomizationRefFromLabels(l); nn != nil {
-			a.kustomizations.Insert(*nn)
+			a.kustomizations = a.kustomizations.Insert(*nn)
 		}
 		p.apps[appName] = a
 		return nil
@@ -138,7 +138,7 @@ type discoveryApplication struct {
 	instances      k8ssets.String
 	parents        k8ssets.String
 	components     k8ssets.String
-	kustomizations sets.NamespacedNames
+	kustomizations sets.Set[types.NamespacedName]
 }
 
 func findApplication(name string, apps []Application) *Application {
