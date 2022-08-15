@@ -1,6 +1,6 @@
 module github.com/gitops-tools/apps-scanner
 
-go 1.18
+go 1.19
 
 require (
 	github.com/emicklei/dot v0.16.0

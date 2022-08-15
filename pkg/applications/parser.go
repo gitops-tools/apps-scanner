@@ -8,7 +8,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	k8ssets "k8s.io/apimachinery/pkg/util/sets"
 )
 
 const (
@@ -66,9 +65,9 @@ func (p *Parser) Add(list runtime.Object) error {
 		if !ok {
 			a = discoveryApplication{
 				name:           appName,
-				instances:      k8ssets.NewString(),
-				parents:        k8ssets.NewString(),
-				components:     k8ssets.NewString(),
+				instances:      sets.New[string](),
+				parents:        sets.New[string](),
+				components:     sets.New[string](),
 				kustomizations: sets.New[types.NamespacedName](),
 			}
 		}
@@ -79,7 +78,7 @@ func (p *Parser) Add(list runtime.Object) error {
 			a.parents.Insert(l[partOfLabel])
 		}
 		if nn := kustomizationRefFromLabels(l); nn != nil {
-			a.kustomizations = a.kustomizations.Insert(*nn)
+			a.kustomizations.Insert(*nn)
 		}
 		p.apps[appName] = a
 		return nil
@@ -135,9 +134,9 @@ func (p *Parser) Applications() []Application {
 // of services/environments/kustomizations.
 type discoveryApplication struct {
 	name           string
-	instances      k8ssets.String
-	parents        k8ssets.String
-	components     k8ssets.String
+	instances      sets.Set[string]
+	parents        sets.Set[string]
+	components     sets.Set[string]
 	kustomizations sets.Set[types.NamespacedName]
 }
 
