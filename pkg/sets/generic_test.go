@@ -11,7 +11,7 @@ import (
 )
 
 func TestSet_New(t *testing.T) {
-	ss := New[types.NamespacedName](
+	ss := New(
 		nsn("test"),
 		nsn("test2"),
 		nsn("test"),
@@ -61,7 +61,7 @@ func TestSet_Insert(t *testing.T) {
 }
 
 func TestSet_Delete(t *testing.T) {
-	ss := New[types.NamespacedName](
+	ss := New(
 		nsn("test"),
 		nsn("test2"),
 	)
@@ -76,7 +76,7 @@ func TestSet_Delete(t *testing.T) {
 }
 
 func TestSet_Has(t *testing.T) {
-	ss := New[types.NamespacedName](
+	ss := New(
 		nsn("test"),
 	)
 
@@ -89,7 +89,7 @@ func TestSet_Has(t *testing.T) {
 }
 
 func TestSet_HasAll(t *testing.T) {
-	ss := New[types.NamespacedName](
+	ss := New(
 		nsn("test"),
 		nsn("test2"),
 	)
@@ -130,7 +130,7 @@ func TestSet_HasAll(t *testing.T) {
 }
 
 func TestSet_IsSuperset(t *testing.T) {
-	ss := New[types.NamespacedName](
+	ss := New(
 		nsn("test"),
 		nsn("test2"),
 	)
@@ -171,7 +171,7 @@ func TestSet_IsSuperset(t *testing.T) {
 }
 
 func TestSet_HasAny(t *testing.T) {
-	ss := New[types.NamespacedName](
+	ss := New(
 		nsn("test"),
 		nsn("test2"),
 	)
@@ -211,12 +211,12 @@ func TestSet_HasAny(t *testing.T) {
 }
 
 func TestSet_Difference(t *testing.T) {
-	a := New[types.NamespacedName](
+	a := New(
 		nsn("test1"),
 		nsn("test2"),
 		nsn("test3"),
 	)
-	b := New[types.NamespacedName](
+	b := New(
 		nsn("test1"),
 		nsn("test2"),
 		nsn("test4"),
@@ -246,24 +246,24 @@ func TestSet_Union(t *testing.T) {
 		want Set[types.NamespacedName]
 	}{
 		{
-			s1:   New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
-			s2:   New[types.NamespacedName](nsn("test3"), nsn("test4"), nsn("test5"), nsn("test6")),
-			want: New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4"), nsn("test5"), nsn("test6")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test3"), nsn("test4"), nsn("test5"), nsn("test6")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4"), nsn("test5"), nsn("test6")),
 		},
 		{
-			s1:   New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
-			s2:   New[types.NamespacedName](),
-			want: New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New[types.NamespacedName](),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
 		},
 		{
-			s1:   New[types.NamespacedName](),
-			s2:   New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
-			want: New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New[types.NamespacedName](),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
 		},
 		{
-			s1:   New[types.NamespacedName](),
-			s2:   New[types.NamespacedName](),
-			want: New[types.NamespacedName](),
+			New[types.NamespacedName](),
+			New[types.NamespacedName](),
+			New[types.NamespacedName](),
 		},
 	}
 
@@ -286,23 +286,23 @@ func TestSet_Intersection(t *testing.T) {
 		want Set[types.NamespacedName]
 	}{
 		{
-			New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
-			New[types.NamespacedName](nsn("test3"), nsn("test4"), nsn("test5"), nsn("test6")),
-			New[types.NamespacedName](nsn("test3"), nsn("test4")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test3"), nsn("test4"), nsn("test5"), nsn("test6")),
+			New(nsn("test3"), nsn("test4")),
 		},
 		{
-			New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
-			New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
-			New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
 		},
 		{
-			New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
 			New[types.NamespacedName](),
 			New[types.NamespacedName](),
 		},
 		{
 			New[types.NamespacedName](),
-			New[types.NamespacedName](nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
+			New(nsn("test1"), nsn("test2"), nsn("test3"), nsn("test4")),
 			New[types.NamespacedName](),
 		},
 		{
