@@ -96,11 +96,7 @@ func TestParser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := NewParser()
 			for _, v := range tt.items {
-				repos := &sourcev1.GitRepositoryList{
-					Items: v,
-				}
-
-				err := p.Add(repos)
+				err := p.Add(v)
 				if err != nil {
 					t.Fatal(err)
 				}

@@ -16,12 +16,12 @@ import (
 func TestParser(t *testing.T) {
 	discoverTests := []struct {
 		name  string
-		items [][]corev1.Pod
+		items [][]runtime.Object
 		want  []Application
 	}{
 		{
 			name: "pods with no labels",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(),
 				},
@@ -30,7 +30,7 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name: "simple application, one instance, no parent",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(withLabels(map[string]string{
 						instanceLabel:  "mysql-abcxzy",
@@ -49,7 +49,7 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name: "one application, two instances, no parents",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(withLabels(map[string]string{
 						instanceLabel:  "mysql-abcxzy",
@@ -73,7 +73,7 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name: "two applications, one instance, with a parent",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(withLabels(map[string]string{
 						instanceLabel:  "mysql-abcxzy",
@@ -109,7 +109,7 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name: "three applications, one instance, with nested parents",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(withLabels(map[string]string{
 						instanceLabel:  "mysql-abcxzy",
@@ -158,7 +158,7 @@ func TestParser(t *testing.T) {
 
 		{
 			name: "simple application, with kustomization labels",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(withLabels(map[string]string{
 						instanceLabel:          "mysql-abcxzy",
@@ -189,11 +189,7 @@ func TestParser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := NewParser()
 			for _, v := range tt.items {
-				pods := &corev1.PodList{
-					Items: v,
-				}
-
-				err := p.Add(pods)
+				err := p.Add(v)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -206,10 +202,10 @@ func TestParser(t *testing.T) {
 	}
 }
 
-func makePod(opts ...func(runtime.Object)) corev1.Pod {
-	p := corev1.Pod{}
+func makePod(opts ...func(runtime.Object)) *corev1.Pod {
+	p := &corev1.Pod{}
 	for _, o := range opts {
-		o(&p)
+		o(p)
 	}
 	return p
 }

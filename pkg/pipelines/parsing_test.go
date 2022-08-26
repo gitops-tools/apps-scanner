@@ -15,13 +15,13 @@ import (
 func TestParser(t *testing.T) {
 	discoverTests := []struct {
 		name  string
-		items [][]corev1.Pod
+		items [][]runtime.Object
 		want  []Pipeline
 		opts  []cmp.Option
 	}{
 		{
 			name: "pods with no labels",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(),
 				},
@@ -30,7 +30,7 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name: "one pipeline, one environment",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(withLabels(map[string]string{
 						PipelineNameLabel:        "billing-pipeline",
@@ -47,7 +47,7 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name: "one pipeline, two environments",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(withLabels(map[string]string{
 						PipelineNameLabel:        "billing-pipeline",
@@ -75,7 +75,7 @@ func TestParser(t *testing.T) {
 		},
 		{
 			name: "one pipeline, two ordered environments",
-			items: [][]corev1.Pod{
+			items: [][]runtime.Object{
 				{
 					makePod(withLabels(map[string]string{
 						PipelineNameLabel:        "billing-pipeline",
@@ -103,11 +103,7 @@ func TestParser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			p := NewParser()
 			for _, v := range tt.items {
-				pods := &corev1.PodList{
-					Items: v,
-				}
-
-				err := p.Add(pods)
+				err := p.Add(v)
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -125,7 +121,7 @@ func TestParser(t *testing.T) {
 }
 
 func TestParser_with_custom_labels(t *testing.T) {
-	pods := []corev1.Pod{
+	pods := []runtime.Object{
 		makePod(withLabels(map[string]string{
 			"testing.pipeline":    "billing-pipeline",
 			"testing.environment": "production",
@@ -138,7 +134,7 @@ func TestParser_with_custom_labels(t *testing.T) {
 	}
 
 	p := NewParser(WithLabels("testing.pipeline", "testing.environment", "testing.after"))
-	err := p.Add(&corev1.PodList{Items: pods})
+	err := p.Add(pods)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,10 +156,10 @@ func TestParser_with_custom_labels(t *testing.T) {
 	}
 }
 
-func makePod(opts ...func(runtime.Object)) corev1.Pod {
-	p := corev1.Pod{}
+func makePod(opts ...func(runtime.Object)) *corev1.Pod {
+	p := &corev1.Pod{}
 	for _, o := range opts {
-		o(&p)
+		o(p)
 	}
 	return p
 }

@@ -39,8 +39,8 @@ func NewParser() *Parser {
 }
 
 // Add a list of GitRepository objects to be parsed.
-func (p *Parser) Add(list *sourcev1.GitRepositoryList) error {
-	for _, repo := range list.Items {
+func (p *Parser) Add(list []sourcev1.GitRepository) error {
+	for _, repo := range list {
 		k, ok := p.repositories[repo.Spec.URL]
 		if !ok {
 			k = discoveryRepository{

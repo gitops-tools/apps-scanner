@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/gitops-tools/apps-scanner/pkg/sets"
+	"github.com/gitops-tools/pkg/sets"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -48,18 +48,19 @@ func NewParser() *Parser {
 	}
 }
 
-// Add a list of objects to the parser.
+// Add a set of runtime Objects to the parser.
 //
-// The list should be a List type, e.g. PodList, DeploymentList etc.
-func (p *Parser) Add(list runtime.Object) error {
-	return meta.EachListItem(list, func(obj runtime.Object) error {
+// Multiple sets of runtime Objects can be added before discovering the
+// Applications.
+func (p *Parser) Add(list []runtime.Object) error {
+	for _, obj := range list {
 		l, err := p.Accessor.Labels(obj)
 		if err != nil {
 			return fmt.Errorf("failed to get labels from %v: %w", obj, err)
 		}
 		appName := l[nameLabel]
 		if appName == "" {
-			return nil
+			continue
 		}
 		a, ok := p.apps[appName]
 		if !ok {
@@ -81,8 +82,8 @@ func (p *Parser) Add(list runtime.Object) error {
 			a.kustomizations.Insert(*nn)
 		}
 		p.apps[appName] = a
-		return nil
-	})
+	}
+	return nil
 }
 
 // Applications returns the Applications that were discovered during the parsing

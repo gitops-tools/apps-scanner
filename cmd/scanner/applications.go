@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -37,7 +38,7 @@ func listApplications(cl client.Client) func(*cobra.Command, []string) error {
 		fmt.Printf("found %d deployments\n", len(deploymentList.Items))
 
 		p := applications.NewParser()
-		if err := p.Add(deploymentList); err != nil {
+		if err := p.Add(deploymentsToRuntimeObjects(deploymentList.Items...)); err != nil {
 			return fmt.Errorf("failed to discover applications: %w", err)
 		}
 
@@ -107,4 +108,13 @@ func hasParentApplication(app applications.Application, parent string) bool {
 		}
 	}
 	return false
+}
+
+func deploymentsToRuntimeObjects(deploys ...appsv1.Deployment) []runtime.Object {
+	objs := make([]runtime.Object, len(deploys))
+	for i := range deploys {
+		objs[i] = &deploys[i]
+	}
+
+	return objs
 }

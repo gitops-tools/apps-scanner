@@ -66,15 +66,15 @@ func NewParser(opts ...func(*Parser)) *Parser {
 
 // Add accepts a list of objects and records them for parsing with the Pipelines
 // method.
-func (p *Parser) Add(list runtime.Object) error {
-	return meta.EachListItem(list, func(obj runtime.Object) error {
+func (p *Parser) Add(list []runtime.Object) error {
+	for _, obj := range list {
 		l, err := p.accessor.Labels(obj)
 		if err != nil {
 			return fmt.Errorf("failed to get labels from %v: %w", obj, err)
 		}
 		pipelineName := l[p.Labels.Pipeline]
 		if pipelineName == "" {
-			return nil
+			continue
 		}
 		a, ok := p.discovery[pipelineName]
 		if !ok {
@@ -89,8 +89,9 @@ func (p *Parser) Add(list runtime.Object) error {
 			a.environments.Insert(environment{name: n, after: after})
 		}
 		p.discovery[pipelineName] = a
-		return nil
-	})
+	}
+
+	return nil
 }
 
 // Pipelines returns the discovered pipelines.
