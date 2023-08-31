@@ -8,7 +8,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -213,12 +212,8 @@ func makePod(opts ...func(runtime.Object)) *corev1.Pod {
 func withLabels(m map[string]string) func(runtime.Object) {
 	var accessor = meta.NewAccessor()
 	return func(obj runtime.Object) {
-		accessor.SetLabels(obj, m)
-	}
-}
-
-func makeObjectMetaWithLabels(m map[string]string) metav1.ObjectMeta {
-	return metav1.ObjectMeta{
-		Labels: m,
+		if err := accessor.SetLabels(obj, m); err != nil {
+			panic(err)
+		}
 	}
 }

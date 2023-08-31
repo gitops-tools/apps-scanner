@@ -141,15 +141,6 @@ type discoveryApplication struct {
 	kustomizations sets.Set[types.NamespacedName]
 }
 
-func findApplication(name string, apps []Application) *Application {
-	for _, v := range apps {
-		if v.Name == name {
-			return &v
-		}
-	}
-	return nil
-}
-
 func kustomizationRefFromLabels(m map[string]string) *types.NamespacedName {
 	name, ok := m[kustomizationName]
 	if !ok {

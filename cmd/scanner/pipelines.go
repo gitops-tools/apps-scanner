@@ -33,7 +33,7 @@ func listPipelines(cl client.Client) func(*cobra.Command, []string) error {
 		p := pipelines.NewParser()
 		pipelines, err := p.Pipelines()
 		if err != nil {
-			fmt.Errorf("failed to discover pipelines: %w", err)
+			return fmt.Errorf("failed to discover pipelines: %w", err)
 		}
 
 		for _, v := range pipelines {

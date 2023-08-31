@@ -35,7 +35,9 @@ func OrderEnvironments(o []environment) ([]string, error) {
 		if !ok {
 			return nil, fmt.Errorf("reference to unknown environment %q", v.after)
 		}
-		d.AddEdge(after, environmentsToIDs[v.name])
+		if err := d.AddEdge(after, environmentsToIDs[v.name]); err != nil {
+			return nil, err
+		}
 	}
 
 	roots := d.GetRoots()
