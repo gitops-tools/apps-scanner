@@ -135,7 +135,14 @@ func TestParser(t *testing.T) {
 					Name:       "mysql",
 					Instances:  []string{"mysql-abcxzy"},
 					Components: []string{"database"},
-					Parents:    []Application{{Name: "server"}},
+					Parents: []Application{
+						{
+							Name:       "server",
+							Instances:  []string{"php-deftuv"},
+							Components: []string{"web"},
+							Parents:    []Application{{Name: "wordpress"}},
+						},
+					},
 				},
 				{
 					Name:       "php",
@@ -154,7 +161,6 @@ func TestParser(t *testing.T) {
 				},
 			},
 		},
-
 		{
 			name: "simple application, with kustomization labels",
 			items: [][]runtime.Object{
